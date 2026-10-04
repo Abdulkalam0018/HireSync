@@ -37,6 +37,23 @@ function createApp() {
     next();
   });
 
+  // Root endpoint: API directory for browsers and API consumers.
+  app.get('/', (req, res) => {
+    res.json({
+      name: 'HireSync API',
+      description: 'Tech Internship Aggregator Pipeline',
+      status: 'online',
+      endpoints: {
+        health: '/health',
+        jobs: '/api/jobs',
+        scrapeStatus: '/api/scrape/status',
+        triggerScrape: 'POST /api/scrape/trigger',
+        ...(config.mockBoard.enabled && { mockBoard: '/mock-board/jobs' }),
+      },
+      documentation: 'https://github.com/Abdulkalam0018/HireSync',
+    });
+  });
+
   // Health check for load balancers / uptime monitors. Also pings the DB, so
   // "healthy" means "can actually serve data", not just "process is alive".
   app.get('/health', async (req, res) => {
