@@ -54,11 +54,7 @@ const config = {
   databaseUrl: process.env.DATABASE_URL,
 
   scraper: {
-    baseUrl:
-      process.env.SCRAPE_BASE_URL ||
-      (process.env.RENDER_EXTERNAL_URL
-        ? `${process.env.RENDER_EXTERNAL_URL}/mock-board/jobs`
-        : `http://localhost:${port}/mock-board/jobs`),
+    baseUrl: process.env.SCRAPE_BASE_URL || `http://localhost:${port}/mock-board/jobs`,
     sourceName: process.env.SCRAPE_SOURCE_NAME || 'mockyc',
     maxPages: int('SCRAPE_MAX_PAGES', 10),
     minDelayMs: int('SCRAPE_MIN_DELAY_MS', 1500),
