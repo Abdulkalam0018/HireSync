@@ -554,6 +554,19 @@
       }
     }
 
+    function getApplyUrl(url) {
+      if (!url) return '#';
+      if (url.includes('localhost:') || url.includes('127.0.0.1:')) {
+        try {
+          const parsed = new URL(url);
+          return window.location.origin + parsed.pathname + parsed.search;
+        } catch {
+          return url;
+        }
+      }
+      return url;
+    }
+
     function renderJobs(jobs) {
       const grid = document.getElementById('jobsGrid');
       document.getElementById('displayCount').innerText = jobs.length;
@@ -586,7 +599,7 @@
             </div>
             <div class="job-footer">
               <span class="verified-badge">✓ Verified</span>
-              <a href="${job.applyUrl}" target="_blank" class="apply-btn">
+              <a href="${getApplyUrl(job.applyUrl)}" target="_blank" rel="noopener noreferrer" class="apply-btn">
                 Apply →
               </a>
             </div>
