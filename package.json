@@ -10,7 +10,6 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "scrape": "node src/scripts/runOnce.js",
     "test": "node --test tests/",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",

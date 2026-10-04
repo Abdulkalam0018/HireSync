@@ -1,0 +1,64 @@
+/**
+ * Express application factory.
+ *
+ * `app.js` BUILDS the app (middleware + routes); `server.js` RUNS it
+ * (listen, cron, shutdown). Keeping them apart lets tests import the app
+ * without opening a port or starting the scheduler.
+ *
+ * Middleware order matters - a request flows top to bottom:
+ *   JSON parser -> request logger -> routes -> 404 handler -> error handler
+ */
+const express = require('express');
+const config = require('./config');
+const logger = require('./lib/logger');
+const prisma = require('./lib/prisma');
+const apiRouter = require('./routes');
+const mockBoardRouter = require('./mock-board/router');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
+
+function createApp() {
+  const app = express();
+
+  app.disable('x-powered-by'); // don't advertise our stack to attackers
+  app.use(express.json({ limit: '100kb' })); // cap body size
+
+  // Request logging: method, path, status and latency for every request.
+  app.use((req, res, next) => {
+    const start = process.hrtime.bigint();
+    res.on('finish', () => {
+      const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
+      logger.info('HTTP request', {
+        method: req.method,
+        path: req.originalUrl,
+        status: res.statusCode,
+        durationMs: Math.round(durationMs),
+      });
+    });
+    next();
+  });
+
+  // Health check for load balancers / uptime monitors. Also pings the DB, so
+  // "healthy" means "can actually serve data", not just "process is alive".
+  app.get('/health', async (req, res) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      res.json({ status: 'ok', database: 'up', uptimeSec: Math.round(process.uptime()) });
+    } catch (err) {
+      logger.error('Health check failed', { err });
+      res.status(503).json({ status: 'degraded', database: 'down' });
+    }
+  });
+
+  if (config.mockBoard.enabled) {
+    app.use('/mock-board', mockBoardRouter);
+  }
+
+  app.use('/api', apiRouter);
+
+  app.use(notFound);
+  app.use(errorHandler);
+
+  return app;
+}
+
+module.exports = { createApp };
