@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Secrets - NEVER commit real credentials. Use .env.example as the template.
+.env
+.env.*
+!.env.example
+
+# Logs & OS noise
+*.log
+npm-debug.log*
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
