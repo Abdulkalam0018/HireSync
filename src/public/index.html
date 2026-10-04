@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireSync — Tech Internship Aggregator Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 24, 38, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: rgba(99, 102, 241, 0.4);
+      --primary: #6366f1;
+      --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      --accent-green: #10b981;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: var(--primary-gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.4);
+      animation: pulseGlow 3s infinite alternate;
+    }
+
+    .brand-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(to right, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.65rem 1.15rem;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid transparent;
+      font-family: var(--font-sans);
+    }
+
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      border-color: var(--card-border);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Status Pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #34d399;
+      font-family: var(--font-mono);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      width: 14px;
+      height: 14px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: ripple 1.8s infinite;
+    }
+
+    /* Hero Banner */
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-gradient {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.75rem;
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--card-hover-border);
+      box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.2);
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+
+    /* Controls: Search & Filter */
+    .controls-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.85rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 1.1rem;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      padding: 0.55rem 0.95rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pill:hover, .pill.active {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Jobs Grid */
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .job-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.65rem;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      opacity: 0;
+      animation: cardAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .job-card:hover {
+      transform: translateY(-5px) scale(1.01);
+      border-color: var(--card-hover-border);
+      box-shadow: 0 16px 36px -12px rgba(99, 102, 241, 0.25);
+    }
+
+    .job-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .company-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .job-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .job-company {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .job-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .job-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.35rem;
+    }
+
+    .tag {
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .tag-location {
+      background: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .tag-date {
+      background: rgba(168, 85, 247, 0.1);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .job-footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .job-id {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .apply-btn {
+      padding: 0.45rem 0.95rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .apply-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      transform: translateX(2px);
+    }
+
+    /* Modal Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      color: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    /* Keyframes */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(15px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 16px -4px rgba(99, 102, 241, 0.4); }
+      to { box-shadow: 0 0 28px 2px rgba(168, 85, 247, 0.7); }
+    }
+
+    @keyframes ripple {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      grid-column: 1 / -1;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-logo">⚡</div>
+        <div>
+          <div class="brand-title">HireSync</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          <span>POSTGRESQL CONNECTED</span>
+        </div>
+        <button id="triggerBtn" class="btn btn-primary" onclick="triggerScrape()">
+          <span>⚡ Run Scraper</span>
+        </button>
+        <a href="/api/jobs" target="_blank" class="btn btn-outline">
+          <span>{ } Raw JSON API</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-badge">Production ETL Pipeline</div>
+      <h1 class="hero-title">Aggregated Tech Internships <br><span class="hero-gradient">Scraped & De-duplicated in Real Time</span></h1>
+      <p class="hero-subtitle">
+        Automated 12-hour ingestion using Node.js, Express, Axios, Cheerio, and PostgreSQL with atomic upserts.
+      </p>
+    </section>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Postings</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Companies</div>
+        <div class="stat-value" id="statCompanies">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Deduplication Key</div>
+        <div class="stat-value" style="font-size: 1.1rem; color: #a5b4fc; padding-top: 0.3rem;">externalJobId</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Crawl Cadence</div>
+        <div class="stat-value" style="font-size: 1.1rem; color: #34d399; padding-top: 0.3rem;">Every 12h (Cron)</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by role or company (e.g. Backend, Acme, Remote)..." oninput="filterJobs()">
+      </div>
+      <div class="filter-pills" id="locationFilter">
+        <button class="pill active" onclick="setLocationFilter('all', this)">All</button>
+        <button class="pill" onclick="setLocationFilter('Remote', this)">Remote</button>
+        <button class="pill" onclick="setLocationFilter('India', this)">India</button>
+        <button class="pill" onclick="setLocationFilter('US', this)">US</button>
+      </div>
+    </div>
+
+    <!-- Jobs Grid -->
+    <div class="jobs-grid" id="jobsGrid">
+      <div class="empty-state">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem;">Loading jobs from PostgreSQL...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span id="toastIcon">🚀</span>
+    <span id="toastMessage">Scraper finished successfully!</span>
+  </div>
+
+  <script>
+    let allJobs = [];
+    let currentLocation = 'all';
+
+    // Pastel gradient avatars for company icons
+    const avatarGradients = [
+      'linear-gradient(135deg, #4f46e5, #06b6d4)',
+      'linear-gradient(135deg, #ec4899, #8b5cf6)',
+      'linear-gradient(135deg, #10b981, #3b82f6)',
+      'linear-gradient(135deg, #f59e0b, #ef4444)',
+      'linear-gradient(135deg, #8b5cf6, #3b82f6)',
+      'linear-gradient(135deg, #14b8a6, #6366f1)',
+    ];
+
+    function getGradient(name) {
+      let hash = 0;
+      for (let i = 0; i < (name || '').length; i++) hash += name.charCodeAt(i);
+      return avatarGradients[Math.abs(hash) % avatarGradients.length];
+    }
+
+    function formatRelativeDate(isoDate) {
+      if (!isoDate) return 'Recently';
+      const diffMs = Date.now() - new Date(isoDate).getTime();
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHours < 1) return 'Just now';
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays}d ago`;
+    }
+
+    async function fetchJobs() {
+      try {
+        const res = await fetch('/api/jobs?limit=100');
+        const json = await res.json();
+        allJobs = json.data || [];
+        updateStats(allJobs);
+        renderJobs(allJobs);
+      } catch (err) {
+        document.getElementById('jobsGrid').innerHTML = `
+          <div class="empty-state">
+            <p>⚠️ Failed to load postings from database.</p>
+          </div>`;
+      }
+    }
+
+    function updateStats(jobs) {
+      document.getElementById('statTotal').innerText = jobs.length;
+      const companies = new Set(jobs.map(j => j.company)).size;
+      document.getElementById('statCompanies').innerText = companies;
+    }
+
+    function renderJobs(jobs) {
+      const grid = document.getElementById('jobsGrid');
+      if (!jobs.length) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <p>No internship postings found matching your search.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = jobs.map((job, idx) => {
+        const initial = (job.company || 'J').charAt(0).toUpperCase();
+        const delay = Math.min(idx * 0.04, 0.6);
+        return `
+          <div class="job-card" style="animation-delay: ${delay}s">
+            <div class="job-header">
+              <div class="company-avatar" style="background: ${getGradient(job.company)}">
+                ${initial}
+              </div>
+              <div class="job-meta">
+                <div class="job-company">${job.company}</div>
+                <div class="job-title" title="${job.title}">${job.title}</div>
+              </div>
+            </div>
+            <div class="job-tags">
+              <span class="tag tag-location">📍 ${job.location || 'Remote'}</span>
+              <span class="tag tag-date">⏱ ${formatRelativeDate(job.postedDate)}</span>
+            </div>
+            <div class="job-footer">
+              <span class="job-id">${job.externalJobId}</span>
+              <a href="${job.applyUrl}" target="_blank" class="apply-btn">
+                Apply →
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterJobs() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = allJobs.filter(job => {
+        const matchesQuery = 
+          job.title.toLowerCase().includes(query) ||
+          job.company.toLowerCase().includes(query) ||
+          job.location.toLowerCase().includes(query);
+
+        let matchesLocation = true;
+        if (currentLocation === 'Remote') {
+          matchesLocation = job.location.toLowerCase().includes('remote');
+        } else if (currentLocation === 'India') {
+          matchesLocation = job.location.toLowerCase().includes('india') || job.location.toLowerCase().includes('bengaluru') || job.location.toLowerCase().includes('hyderabad') || job.location.toLowerCase().includes('pune');
+        } else if (currentLocation === 'US') {
+          matchesLocation = job.location.toLowerCase().includes('sf') || job.location.toLowerCase().includes('ca') || job.location.toLowerCase().includes('new york') || job.location.toLowerCase().includes('austin') || job.location.toLowerCase().includes('boston') || job.location.toLowerCase().includes('seattle');
+        }
+
+        return matchesQuery && matchesLocation;
+      });
+      renderJobs(filtered);
+    }
+
+    function setLocationFilter(loc, button) {
+      currentLocation = loc;
+      document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+      button.classList.add('active');
+      filterJobs();
+    }
+
+    async function triggerScrape() {
+      const btn = document.getElementById('triggerBtn');
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> <span>Scraping & Upserting...</span>`;
+
+      showToast('⏳ Crawling job board and upserting into PostgreSQL...', '⚙️');
+
+      try {
+        const res = await fetch('/api/scrape/trigger?wait=true', {
+          method: 'POST',
+          headers: { 'x-api-key': 'my-secret-key-123' }
+        });
+        const data = await res.json();
+        await fetchJobs();
+        showToast('✅ Scrape & Ingestion complete! Jobs updated.', '🎉');
+      } catch (err) {
+        showToast('⚠️ Scrape trigger failed.', '❌');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      }
+    }
+
+    function showToast(msg, icon = '🚀') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = msg;
+      document.getElementById('toastIcon').innerText = icon;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    // Initial load
+    fetchJobs();
+  </script>
+</body>
+</html>

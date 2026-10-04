@@ -8,6 +8,7 @@
  * Middleware order matters - a request flows top to bottom:
  *   JSON parser -> request logger -> routes -> 404 handler -> error handler
  */
+const path = require('node:path');
 const express = require('express');
 const config = require('./config');
 const logger = require('./lib/logger');
@@ -37,8 +38,14 @@ function createApp() {
     next();
   });
 
-  // Root endpoint: API directory for browsers and API consumers.
+  // Serve static UI assets from src/public
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  // Root endpoint: HTML dashboard for browsers, JSON for API clients
   app.get('/', (req, res) => {
+    if (req.accepts('html')) {
+      return res.sendFile(path.join(__dirname, 'public/index.html'));
+    }
     res.json({
       name: 'HireSync API',
       description: 'Tech Internship Aggregator Pipeline',
@@ -51,6 +58,20 @@ function createApp() {
         ...(config.mockBoard.enabled && { mockBoard: '/mock-board/jobs' }),
       },
       documentation: 'https://github.com/Abdulkalam0018/HireSync',
+    });
+  });
+
+  // Dedicated JSON API directory
+  app.get('/api', (req, res) => {
+    res.json({
+      name: 'HireSync API',
+      description: 'Tech Internship Aggregator Pipeline',
+      endpoints: {
+        health: '/health',
+        jobs: '/api/jobs',
+        scrapeStatus: '/api/scrape/status',
+        triggerScrape: 'POST /api/scrape/trigger',
+      },
     });
   });
 
