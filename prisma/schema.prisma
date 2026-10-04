@@ -1,0 +1,69 @@
+// =====================================================================
+// Prisma schema: the single source of truth for our database structure.
+//
+// `npx prisma migrate dev` turns this file into SQL migrations, and
+// `npx prisma generate` turns it into a type-safe JS client (@prisma/client).
+// =====================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------
+// JobPosting: one row per unique job on a source job board.
+//
+// DUPLICATE HANDLING (key interview point):
+//   * `externalJobId` is the job's identity on the SOURCE site, namespaced
+//     by source (e.g. "mockyc:1001"). It has a UNIQUE constraint.
+//   * The ingestion layer UPSERTs on this column: if the job already exists
+//     we UPDATE it, otherwise we INSERT it. Running the scraper 100 times
+//     still leaves exactly ONE row per job.
+//   * The UNIQUE constraint is the final safety net: even if two scrapes
+//     ran concurrently, PostgreSQL itself refuses a second copy.
+// ---------------------------------------------------------------------
+model JobPosting {
+  id            Int       @id @default(autoincrement())
+
+  /// Stable ID from the source site (or a hash fallback). The dedup key.
+  externalJobId String    @unique @db.VarChar(255)
+
+  title         String    @db.VarChar(300)
+  company       String    @db.VarChar(200)
+  location      String    @db.VarChar(200)
+  applyUrl      String    @db.VarChar(2048)
+
+  /// When the source says the job was posted. Nullable because some boards
+  /// don't show it - storing a fake date would corrupt date filtering.
+  postedDate    DateTime?
+
+  /// LAST time our scraper saw this job. Refreshed on every upsert.
+  /// Jobs whose scrapedAt stops moving have probably been taken down.
+  scrapedAt     DateTime  @default(now())
+
+  /// FIRST time we saw this job. Set once on insert, never updated.
+  createdAt     DateTime  @default(now())
+
+  // ------------------------------- Indexes -------------------------------
+  // Without indexes, every filtered query is a full table scan (O(n)).
+  // A B-tree index makes these lookups O(log n).
+
+  // "Newest jobs first" - the default sort of GET /api/jobs.
+  @@index([postedDate(sort: Desc)])
+
+  // "All jobs at company X".
+  @@index([company])
+
+  // Composite index for "jobs at company X, newest first". PostgreSQL can
+  // filter by company AND read rows already sorted by date - no extra sort.
+  @@index([company, postedDate(sort: Desc)])
+
+  // Used to find stale jobs (not seen in recent scrapes).
+  @@index([scrapedAt])
+
+  @@map("job_postings")
+}
