@@ -10,6 +10,8 @@ jobs:
   test:
     name: Lint, Validate & Test
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://ci_dummy:ci_dummy@localhost:5432/dummy"
 
     steps:
       - name: Checkout Code
@@ -26,13 +28,9 @@ jobs:
 
       - name: Validate Prisma Schema
         run: npx prisma validate
-        env:
-          DATABASE_URL: "postgresql://ci_dummy:ci_dummy@localhost:5432/dummy"
 
       - name: Generate Prisma Client
         run: npx prisma generate
-        env:
-          DATABASE_URL: "postgresql://ci_dummy:ci_dummy@localhost:5432/dummy"
 
       - name: Run Test Suite
         run: npm test

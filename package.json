@@ -11,7 +11,7 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "scrape": "node src/scripts/runOnce.js",
-    "test": "node --test 'tests/**/*.test.js'",
+    "test": "node --test",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
