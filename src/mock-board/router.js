@@ -111,12 +111,14 @@ router.get('/jobs/:id', (req, res) => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${esc(job.title)} — ${esc(job.company || 'Startup')}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <title>Apply for ${esc(job.title)} — ${esc(job.company || 'Startup')}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: #090d16;
+      background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 50%);
       color: #f1f5f9;
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       min-height: 100vh;
@@ -124,34 +126,66 @@ router.get('/jobs/:id', (req, res) => {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1rem;
     }
     .card {
       background: rgba(18, 24, 38, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 20px;
       padding: 2.5rem;
-      max-width: 580px;
+      max-width: 620px;
       width: 100%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
     }
     .back-link {
       display: inline-block;
       color: #94a3b8;
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
+      font-weight: 600;
       margin-bottom: 1.5rem;
       transition: color 0.2s;
     }
     .back-link:hover { color: #818cf8; }
-    .company { font-size: 1rem; color: #818cf8; font-weight: 700; margin-bottom: 0.35rem; }
-    .title { font-size: 1.75rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; }
+    .company { font-size: 1rem; color: #818cf8; font-weight: 700; margin-bottom: 0.3rem; }
+    .title { font-size: 1.85rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; letter-spacing: -0.02em; }
     .tags { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .tag { font-size: 0.8rem; padding: 0.3rem 0.75rem; border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: #cbd5e1; }
+    .tag { font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.75rem; border-radius: 8px; background: rgba(255, 255, 255, 0.06); color: #cbd5e1; }
     .desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.25rem; }
+    
+    /* Form Styles */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.86rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.4rem; }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .file-input {
+      padding: 0.6rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      width: 100%;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
     .btn {
       width: 100%;
-      padding: 0.85rem;
+      padding: 0.9rem;
       border: none;
       border-radius: 12px;
       background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
@@ -160,34 +194,96 @@ router.get('/jobs/:id', (req, res) => {
       font-weight: 700;
       cursor: pointer;
       font-family: inherit;
+      margin-top: 1rem;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4); }
-    .success { display: none; text-align: center; color: #34d399; font-weight: 600; margin-top: 1rem; }
+    
+    /* Confirmation State */
+    .confirmation {
+      display: none;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .confirmation-icon { font-size: 3.5rem; margin-bottom: 1rem; animation: pop 0.4s ease; }
+    .confirmation-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; color: #fff; }
+    .confirmation-desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; }
+    .return-btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .return-btn:hover { background: rgba(255, 255, 255, 0.15); }
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <a href="/" class="back-link">← Back to HireSync</a>
-    <div class="company">${esc(job.company || 'Tech Startup')}</div>
-    <h1 class="title">${esc(job.title)}</h1>
-    <div class="tags">
-      <span class="tag">📍 ${esc(job.location || 'Remote')}</span>
-      <span class="tag">💼 Internship</span>
-      <span class="tag">⚡ Verified Post</span>
+    
+    <div id="applicationView">
+      <div class="company">${esc(job.company || 'Tech Startup')}</div>
+      <h1 class="title">${esc(job.title)}</h1>
+      <div class="tags">
+        <span class="tag">📍 ${esc(job.location || 'Remote')}</span>
+        <span class="tag">💼 Internship</span>
+        <span class="tag">⚡ Summer / Fall 2026</span>
+      </div>
+      <div class="desc">
+        We are looking for a motivated <strong>${esc(job.title)}</strong> to join our engineering team. 
+        You will work on production systems, build scalable features, and collaborate directly with senior mentors.
+      </div>
+
+      <form id="applyForm" onsubmit="handleSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="fullName">Full Name *</label>
+          <input class="form-input" id="fullName" type="text" placeholder="e.g. Alex Johnson" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address *</label>
+          <input class="form-input" id="email" type="email" placeholder="alex@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="linkedin">LinkedIn / GitHub Profile *</label>
+          <input class="form-input" id="linkedin" type="url" placeholder="https://linkedin.com/in/..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="resume">Upload Resume (PDF, DOCX) *</label>
+          <input class="file-input" id="resume" type="file" accept=".pdf,.doc,.docx" required>
+        </div>
+        <button type="submit" class="btn" id="submitBtn">Submit Application</button>
+      </form>
     </div>
-    <div class="desc">
-      We are looking for a motivated <strong>${esc(job.title)}</strong> to join our engineering team. 
-      You will work on production systems, build scalable features, and collaborate directly with senior engineers.
+
+    <div class="confirmation" id="confirmationView">
+      <div class="confirmation-icon">🎉</div>
+      <h2 class="confirmation-title">Application Submitted!</h2>
+      <p class="confirmation-desc" id="confirmText">
+        Thank you! Your application for <strong>${esc(job.title)}</strong> at <strong>${esc(job.company || 'our team')}</strong> has been received.
+      </p>
+      <a href="/" class="return-btn">← Return to HireSync Job Board</a>
     </div>
-    <button class="btn" id="applyBtn" onclick="apply()">Submit Application</button>
-    <div class="success" id="successMsg">🎉 Application submitted successfully! Good luck!</div>
   </div>
+
   <script>
-    function apply() {
-      const btn = document.getElementById('applyBtn');
-      btn.style.display = 'none';
-      document.getElementById('successMsg').style.display = 'block';
+    function handleSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      
+      document.getElementById('applicationView').style.display = 'none';
+      document.getElementById('confirmText').innerHTML = 
+        'Thank you, <strong>' + (name || 'Applicant') + '</strong>! Your application for <strong>${esc(job.title)}</strong> at <strong>${esc(job.company || 'our team')}</strong> has been received.<br><br>A confirmation notice was dispatched to <strong>' + email + '</strong>.';
+      document.getElementById('confirmationView').style.display = 'block';
     }
   </script>
 </body>
