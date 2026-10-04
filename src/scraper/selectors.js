@@ -36,7 +36,7 @@ module.exports = {
   company: ['.company-name', '.company', '[data-field="company"]'],
   location: ['.job-location', '.location', '[data-field="location"]'],
   postedDate: ['time[datetime]', '.job-posted', '.posted-at'],
-  applyLink: ['a.apply-link', 'a.job-title', 'h3.title a', 'a[href*="/jobs/"]'],
+  applyLink: ['a.job-title', 'a.apply-link', 'h3.title a', 'a[href*="/jobs/"]'],
 
   // Looked up on the whole page.
   nextPage: ['a.next', 'a[rel="next"]', '.pagination a:contains("Next")'],
